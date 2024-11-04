@@ -1,45 +1,82 @@
 import React from 'react';
+import { BarChart3, TrendingUp, AlertCircle, ChevronRight } from 'lucide-react';
 import { AnalysisResult } from '../types';
-import { LineChart, Lightbulb, Clock } from 'lucide-react';
 
 interface AnalysisProps {
-  result: AnalysisResult | null;
+  analysis: AnalysisResult | null;
 }
 
-export function Analysis({ result }: AnalysisProps) {
-  if (!result) return null;
+export function Analysis({ analysis }: AnalysisProps) {
+  if (!analysis) {
+    return (
+      <div className="p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No Analysis Available</h3>
+        <p className="text-sm text-gray-500">
+          Select a sheet and run analysis to see insights here
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-6">
-      <div className="flex items-center space-x-2">
-        <LineChart className="h-6 w-6 text-indigo-500" />
-        <h2 className="text-xl font-semibold text-gray-900">Analysis Results</h2>
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      <div className="px-6 py-5 border-b border-gray-200">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <BarChart3 className="h-5 w-5 text-indigo-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900">Data Analysis</h2>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="bg-indigo-50 p-4 rounded-lg">
-          <h3 className="flex items-center text-lg font-medium text-indigo-900 mb-2">
-            <Lightbulb className="h-5 w-5 mr-2" />
-            Summary
-          </h3>
-          <p className="text-indigo-700">{result.summary}</p>
-        </div>
+      <div className="p-6">
+        <div className="space-y-6">
+          {/* Summary Section */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+              Summary
+            </h3>
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {analysis.summary}
+              </p>
+            </div>
+          </div>
 
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium text-gray-900">Key Insights</h3>
-          <ul className="space-y-2">
-            {result.insights.map((insight, index) => (
-              <li key={index} className="flex items-start">
-                <span className="flex-shrink-0 h-5 w-5 text-indigo-500 mr-2">•</span>
-                <span className="text-gray-700">{insight}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Key Insights Section */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">
+              Key Insights
+            </h3>
+            <div className="space-y-3">
+              {analysis.insights.map((insight, index) => (
+                <div
+                  key={index}
+                  className="flex items-start space-x-3 bg-white p-4 rounded-lg border border-gray-200 hover:border-indigo-200 transition-colors"
+                >
+                  <div className="flex-shrink-0">
+                    <div className="p-2 bg-indigo-50 rounded-lg">
+                      <TrendingUp className="h-4 w-4 text-indigo-600" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-700">{insight}</p>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div className="flex items-center text-sm text-gray-500">
-          <Clock className="h-4 w-4 mr-1" />
-          <span>Generated at {result.timestamp}</span>
+          {/* Timestamp */}
+          <div className="pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500">
+              Last updated: {analysis.timestamp}
+            </p>
+          </div>
         </div>
       </div>
     </div>

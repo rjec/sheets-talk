@@ -25,7 +25,6 @@ export function SheetViewer({ sheets, activeSheet, onSheetChange, sheetsUrl }: S
       const rawData = await fetchSheetData(sheetId);
       const parsedData = parseSheetData(rawData);
       
-      // Update sheet data here
       console.log('Sheet data refreshed:', parsedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh data');
@@ -39,34 +38,37 @@ export function SheetViewer({ sheets, activeSheet, onSheetChange, sheetsUrl }: S
   const StatusIcon = ({ status }: { status: Sheet['status'] }) => {
     switch (status) {
       case 'ready':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-emerald-500" />;
       case 'loading':
-        return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
       case 'error':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="border-b border-gray-200">
+    <div className="flex flex-col h-full">
+      <div className="border-b border-gray-200 bg-white">
         <div className="flex justify-between items-center px-4">
-          <nav className="flex space-x-4" aria-label="Tabs">
+          <nav className="flex space-x-2" aria-label="Tabs">
             {sheets.map((sheet) => (
               <button
                 key={sheet.id}
                 onClick={() => onSheetChange(sheet.id)}
                 className={`
-                  flex items-center space-x-2 px-3 py-2 text-sm font-medium rounded-t-lg
+                  group relative flex items-center space-x-2 px-4 py-3 text-sm font-medium
                   ${
                     activeSheet === sheet.id
-                      ? 'bg-indigo-100 text-indigo-700 border-b-2 border-indigo-500'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'text-indigo-600'
+                      : 'text-gray-500 hover:text-gray-700'
                   }
                 `}
               >
                 <StatusIcon status={sheet.status} />
                 <span>{sheet.name}</span>
+                {activeSheet === sheet.id && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600" />
+                )}
               </button>
             ))}
           </nav>
@@ -74,7 +76,8 @@ export function SheetViewer({ sheets, activeSheet, onSheetChange, sheetsUrl }: S
           <button
             onClick={refreshData}
             disabled={isLoading}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Refresh data"
           >
             <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -82,42 +85,54 @@ export function SheetViewer({ sheets, activeSheet, onSheetChange, sheetsUrl }: S
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border-b border-red-200">
-          <div className="flex items-center space-x-2 text-red-600">
-            <AlertCircle className="h-5 w-5" />
-            <span className="text-sm">{error}</span>
+        <div className="p-4 bg-red-50">
+          <div className="flex items-center space-x-2 text-red-600 max-w-3xl mx-auto">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span className="text-sm font-medium">{error}</span>
           </div>
         </div>
       )}
 
-      <div className="p-4 overflow-x-auto">
-        {currentSheet && (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                {currentSheet.data[0]?.map((header: string, i: number) => (
-                  <th
-                    key={i}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentSheet.data.slice(1).map((row: string[], rowIndex: number) => (
-                <tr key={rowIndex} className="hover:bg-gray-50">
-                  {row.map((cell: string, cellIndex: number) => (
-                    <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      <div className="flex-1 overflow-auto">
+        <div className="p-4">
+          {currentSheet && (
+            <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      {currentSheet.data[0]?.map((header: string, i: number) => (
+                        <th
+                          key={i}
+                          className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b border-gray-200"
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {currentSheet.data.slice(1).map((row: string[], rowIndex: number) => (
+                      <tr 
+                        key={rowIndex} 
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        {row.map((cell: string, cellIndex: number) => (
+                          <td 
+                            key={cellIndex} 
+                            className="px-6 py-3 text-sm text-gray-600 whitespace-nowrap"
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
